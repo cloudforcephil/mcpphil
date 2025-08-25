@@ -1,0 +1,129 @@
+<![CDATA[<style>
+.fireworks-container {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.9);
+  z-index: 9999;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.fireworks-container.active {
+  opacity: 1;
+}
+
+.firework {
+  position: absolute;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+}
+
+@keyframes explode {
+  0% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(30);
+    opacity: 0;
+  }
+}
+
+@keyframes particle {
+  0% {
+    transform: translate(0, 0);
+    opacity: 1;
+  }
+  100% {
+    transform: translate(var(--tx), var(--ty));
+    opacity: 0;
+  }
+}
+</style>
+
+<div class="fireworks-container"></div>
+
+<script>
+class Firework {
+  constructor(container, x, y) {
+    this.container = container;
+    this.x = x;
+    this.y = y;
+    this.colors = [
+      '#ff0000', '#ffa500', '#ffff00', '#00ff00', 
+      '#00ffff', '#0000ff', '#ff00ff', '#ff69b4'
+    ];
+    this.create();
+  }
+
+  create() {
+    // Create explosion
+    const explosion = document.createElement('div');
+    explosion.className = 'firework';
+    explosion.style.left = `${this.x}px`;
+    explosion.style.top = `${this.y}px`;
+    explosion.style.backgroundColor = this.colors[Math.floor(Math.random() * this.colors.length)];
+    explosion.style.animation = 'explode 0.8s ease-out forwards';
+    this.container.appendChild(explosion);
+
+    // Create particles
+    for (let i = 0; i < 30; i++) {
+      const particle = document.createElement('div');
+      particle.className = 'firework';
+      particle.style.left = `${this.x}px`;
+      particle.style.top = `${this.y}px`;
+      particle.style.backgroundColor = this.colors[Math.floor(Math.random() * this.colors.length)];
+      
+      const angle = (i / 30) * Math.PI * 2;
+      const velocity = 100 + Math.random() * 50;
+      const tx = Math.cos(angle) * velocity;
+      const ty = Math.sin(angle) * velocity;
+      
+      particle.style.setProperty('--tx', `${tx}px`);
+      particle.style.setProperty('--ty', `${ty}px`);
+      particle.style.animation = 'particle 1s ease-out forwards';
+      
+      this.container.appendChild(particle);
+      
+      // Remove particle after animation
+      setTimeout(() => particle.remove(), 1000);
+    }
+
+    // Remove explosion after animation
+    setTimeout(() => explosion.remove(), 800);
+  }
+}
+
+function showFireworks() {
+  const container = document.querySelector('.fireworks-container');
+  container.classList.add('active');
+  
+  // Create multiple fireworks
+  const createFirework = () => {
+    const x = Math.random() * window.innerWidth;
+    const y = Math.random() * (window.innerHeight * 0.7); // Keep in upper 70% of screen
+    new Firework(container, x, y);
+  };
+
+  // Create fireworks with slight delays
+  for (let i = 0; i < 5; i++) {
+    setTimeout(createFirework, i * 300);
+  }
+
+  // Hide container after animation
+  setTimeout(() => {
+    container.classList.remove('active');
+    // Clean up any remaining elements
+    container.innerHTML = '';
+  }, 3000);
+}
+
+// Function to be called when triggering fireworks
+window.triggerFireworks = showFireworks;
+</script>]]>
+
